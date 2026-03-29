@@ -6,9 +6,10 @@ import './index.css'
 // Parse URL parameters
 const urlParams = new URLSearchParams(window.location.search)
 const refreshInterval = parseInt(urlParams.get('refresh') || '60', 10)
+const defaultGroup = urlParams.get('group') || undefined
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <ModelStatusEmbed refreshInterval={refreshInterval} />
+    <ModelStatusEmbed refreshInterval={refreshInterval} defaultGroup={defaultGroup} />
   </React.StrictMode>,
 )

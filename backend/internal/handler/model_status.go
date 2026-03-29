@@ -56,10 +56,10 @@ func RegisterModelStatusEmbedRoutes(r *gin.Engine) {
 	{
 		g.GET("/time-windows", GetTimeWindows)
 		g.GET("/models", GetAvailableModels)
-		g.GET("/status/:model_name", GetSingleModelStatus)
-		g.POST("/status/multiple", GetMultipleModelsStatusHandler)
-		g.POST("/status/batch", GetMultipleModelsStatusHandler)
-		g.GET("/status/all", GetAllModelsStatusHandler)
+		g.GET("/status/:model_name", GetSingleModelStatusEmbed)
+		g.POST("/status/multiple", GetMultipleModelsStatusEmbed)
+		g.POST("/status/batch", GetMultipleModelsStatusEmbed)
+		g.GET("/status/all", GetAllModelsStatusEmbed)
 		g.GET("/config", GetEmbedConfig)
 		g.GET("/config/selected", GetSelectedModels)
 	}
@@ -69,10 +69,10 @@ func RegisterModelStatusEmbedRoutes(r *gin.Engine) {
 	{
 		e.GET("/time-windows", GetTimeWindows)
 		e.GET("/models", GetAvailableModels)
-		e.GET("/status/:model_name", GetSingleModelStatus)
-		e.POST("/status/multiple", GetMultipleModelsStatusHandler)
-		e.POST("/status/batch", GetMultipleModelsStatusHandler)
-		e.GET("/status/all", GetAllModelsStatusHandler)
+		e.GET("/status/:model_name", GetSingleModelStatusEmbed)
+		e.POST("/status/multiple", GetMultipleModelsStatusEmbed)
+		e.POST("/status/batch", GetMultipleModelsStatusEmbed)
+		e.GET("/status/all", GetAllModelsStatusEmbed)
 		e.GET("/config", GetEmbedConfig)
 		e.GET("/config/selected", GetSelectedModels)
 	}
@@ -141,6 +141,61 @@ func GetAllModelsStatusHandler(c *gin.Context) {
 
 	svc := service.NewModelStatusService()
 	data, err := svc.GetAllModelsStatus(window)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.ErrorResp("QUERY_ERROR", err.Error(), ""))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"success":     true,
+		"data":        data,
+		"time_window": window,
+		"cache_ttl":   60,
+	})
+}
+
+// GET /status/:model_name (embed，移除请求计数)
+func GetSingleModelStatusEmbed(c *gin.Context) {
+	modelName := c.Param("model_name")
+	window := c.DefaultQuery("window", service.DefaultTimeWindow)
+
+	svc := service.NewModelStatusService()
+	data, err := svc.GetModelStatusForEmbed(modelName, window)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.ErrorResp("QUERY_ERROR", err.Error(), ""))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"success": true, "data": data})
+}
+
+// POST /status/multiple (embed，移除请求计数)
+func GetMultipleModelsStatusEmbed(c *gin.Context) {
+	var modelNames []string
+	if err := c.ShouldBindJSON(&modelNames); err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResp("INVALID_PARAMS", "Expected array of model names", err.Error()))
+		return
+	}
+	window := c.DefaultQuery("window", service.DefaultTimeWindow)
+
+	svc := service.NewModelStatusService()
+	data, err := svc.GetMultipleModelsStatusForEmbed(modelNames, window)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.ErrorResp("QUERY_ERROR", err.Error(), ""))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"success":     true,
+		"data":        data,
+		"time_window": window,
+		"cache_ttl":   60,
+	})
+}
+
+// GET /status/all (embed，移除请求计数)
+func GetAllModelsStatusEmbed(c *gin.Context) {
+	window := c.DefaultQuery("window", service.DefaultTimeWindow)
+
+	svc := service.NewModelStatusService()
+	data, err := svc.GetAllModelsStatusForEmbed(window)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.ErrorResp("QUERY_ERROR", err.Error(), ""))
 		return

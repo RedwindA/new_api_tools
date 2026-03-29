@@ -150,6 +150,18 @@ def model_status_to_item(status: ModelStatus) -> ModelStatusItem:
     )
 
 
+def strip_counts_for_embed(item: ModelStatusItem) -> dict:
+    """Strip request count fields from model status for embed API."""
+    d = item.model_dump()
+    d.pop("total_requests", None)
+    d.pop("success_count", None)
+    for slot in d.get("slot_data", []):
+        slot["has_requests"] = slot.get("total_requests", 0) > 0
+        slot.pop("total_requests", None)
+        slot.pop("success_count", None)
+    return d
+
+
 @router.get("/windows", response_model=TimeWindowsResponse)
 async def get_time_windows(_: str = Depends(verify_auth)):
     """
@@ -276,7 +288,7 @@ async def get_embed_available_models():
     )
 
 
-@router.get("/embed/status/{model_name}", response_model=ModelStatusResponse)
+@router.get("/embed/status/{model_name}")
 async def get_embed_model_status(
     model_name: str,
     window: str = Query(DEFAULT_TIME_WINDOW, description="Time window: 1h, 6h, 12h, 24h"),
@@ -285,23 +297,24 @@ async def get_embed_model_status(
     """
     [Public] Get status for a specific model within a time window.
     No authentication required for iframe embedding.
+    Request count fields are stripped from the response.
     """
     service = get_model_status_service()
     status = service.get_model_status(model_name, window, use_cache=not no_cache)
-    
+
     if status:
-        return ModelStatusResponse(
-            success=True,
-            data=model_status_to_item(status),
-        )
+        return {
+            "success": True,
+            "data": strip_counts_for_embed(model_status_to_item(status)),
+        }
     else:
-        return ModelStatusResponse(
-            success=False,
-            message=f"Model '{model_name}' not found or has no recent logs",
-        )
+        return {
+            "success": False,
+            "message": f"Model '{model_name}' not found or has no recent logs",
+        }
 
 
-@router.post("/embed/status/batch", response_model=MultipleModelsStatusResponse)
+@router.post("/embed/status/batch")
 async def get_embed_multiple_models_status(
     model_names: List[str],
     window: str = Query(DEFAULT_TIME_WINDOW, description="Time window: 1h, 6h, 12h, 24h"),
@@ -310,19 +323,20 @@ async def get_embed_multiple_models_status(
     [Public] Get status for multiple models within a time window.
     No authentication required for iframe embedding.
     Always uses cache to prevent database overload from high-traffic embed pages.
+    Request count fields are stripped from the response.
     """
     service = get_model_status_service()
     statuses = service.get_multiple_models_status(model_names, window, use_cache=True)
-    
-    return MultipleModelsStatusResponse(
-        success=True,
-        data=[model_status_to_item(s) for s in statuses],
-        time_window=window,
-        cache_ttl=60,
-    )
+
+    return {
+        "success": True,
+        "data": [strip_counts_for_embed(model_status_to_item(s)) for s in statuses],
+        "time_window": window,
+        "cache_ttl": 60,
+    }
 
 
-@router.get("/embed/status", response_model=MultipleModelsStatusResponse)
+@router.get("/embed/status")
 async def get_embed_all_models_status(
     window: str = Query(DEFAULT_TIME_WINDOW, description="Time window: 1h, 6h, 12h, 24h"),
 ):
@@ -330,16 +344,17 @@ async def get_embed_all_models_status(
     [Public] Get status for all available models within a time window.
     No authentication required for iframe embedding.
     Always uses cache to prevent database overload from high-traffic embed pages.
+    Request count fields are stripped from the response.
     """
     service = get_model_status_service()
     statuses = service.get_all_models_status(window, use_cache=True)
-    
-    return MultipleModelsStatusResponse(
-        success=True,
-        data=[model_status_to_item(s) for s in statuses],
-        time_window=window,
-        cache_ttl=60,
-    )
+
+    return {
+        "success": True,
+        "data": [strip_counts_for_embed(model_status_to_item(s)) for s in statuses],
+        "time_window": window,
+        "cache_ttl": 60,
+    }
 
 
 # ==================== Selected Models Config Endpoints ====================

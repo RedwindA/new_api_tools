@@ -379,6 +379,67 @@ func (s *ModelStatusService) SetSiteTitle(title string) {
 	cm.Set("model_status:site_title", title, 0)
 }
 
+// StripCountsForEmbed 移除 embed API 中不应暴露的请求计数数据
+func StripCountsForEmbed(result map[string]interface{}) map[string]interface{} {
+	delete(result, "total_requests")
+	delete(result, "success_count")
+
+	// 直接构造时 slot_data 是 []map[string]interface{}，
+	// 但经过 JSON 缓存反序列化后会变成 []interface{}，两种都要处理
+	switch sd := result["slot_data"].(type) {
+	case []map[string]interface{}:
+		for _, slot := range sd {
+			totalReqs := toInt64(slot["total_requests"])
+			slot["has_requests"] = totalReqs > 0
+			delete(slot, "total_requests")
+			delete(slot, "success_count")
+		}
+	case []interface{}:
+		for _, item := range sd {
+			if slot, ok := item.(map[string]interface{}); ok {
+				totalReqs := toInt64(slot["total_requests"])
+				slot["has_requests"] = totalReqs > 0
+				delete(slot, "total_requests")
+				delete(slot, "success_count")
+			}
+		}
+	}
+	return result
+}
+
+// GetModelStatusForEmbed 返回单个模型状态（移除请求计数）
+func (s *ModelStatusService) GetModelStatusForEmbed(modelName, window string) (map[string]interface{}, error) {
+	result, err := s.GetModelStatus(modelName, window)
+	if err != nil {
+		return nil, err
+	}
+	return StripCountsForEmbed(result), nil
+}
+
+// GetMultipleModelsStatusForEmbed 返回多个模型状态（移除请求计数）
+func (s *ModelStatusService) GetMultipleModelsStatusForEmbed(names []string, window string) ([]map[string]interface{}, error) {
+	results, err := s.GetMultipleModelsStatus(names, window)
+	if err != nil {
+		return nil, err
+	}
+	for i := range results {
+		results[i] = StripCountsForEmbed(results[i])
+	}
+	return results, nil
+}
+
+// GetAllModelsStatusForEmbed 返回所有模型状态（移除请求计数）
+func (s *ModelStatusService) GetAllModelsStatusForEmbed(window string) ([]map[string]interface{}, error) {
+	results, err := s.GetAllModelsStatus(window)
+	if err != nil {
+		return nil, err
+	}
+	for i := range results {
+		results[i] = StripCountsForEmbed(results[i])
+	}
+	return results, nil
+}
+
 // GetEmbedConfig returns embed page configuration
 func (s *ModelStatusService) GetEmbedConfig() map[string]interface{} {
 	config := s.GetConfig()

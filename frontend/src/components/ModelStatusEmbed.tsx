@@ -16,8 +16,7 @@ interface SlotStatus {
   slot: number
   start_time: number
   end_time: number
-  total_requests: number
-  success_count: number
+  has_requests: boolean
   success_rate: number
   status: 'green' | 'yellow' | 'red'
 }
@@ -26,8 +25,6 @@ interface ModelStatus {
   model_name: string
   display_name: string
   time_window: string
-  total_requests: number
-  success_count: number
   success_rate: number
   current_status: 'green' | 'yellow' | 'red'
   slot_data: SlotStatus[]
@@ -817,11 +814,13 @@ function getBadgeColor(status: 'green' | 'yellow' | 'red', styles: typeof themeS
 interface ModelStatusEmbedProps {
   refreshInterval?: number
   defaultTheme?: ThemeId
+  defaultGroup?: string
 }
 
 export function ModelStatusEmbed({
   refreshInterval: defaultRefreshInterval = 60,
   defaultTheme,
+  defaultGroup,
 }: ModelStatusEmbedProps) {
   const [selectedModels, setSelectedModels] = useState<string[]>([])
   const [modelStatuses, setModelStatuses] = useState<ModelStatus[]>([])
@@ -832,7 +831,7 @@ export function ModelStatusEmbed({
   const [timeWindow, setTimeWindow] = useState('24h')
   const [theme, setTheme] = useState<ThemeId>(defaultTheme || 'daylight')
   const [customGroups, setCustomGroups] = useState<EmbedCustomGroup[]>([])
-  const [groupFilter, setGroupFilter] = useState('all')
+  const [groupFilter, setGroupFilter] = useState(defaultGroup || 'all')
   const [siteTitle, setSiteTitle] = useState('')
 
   // Tooltip state - lifted to parent to avoid z-index/transform issues
@@ -878,6 +877,13 @@ export function ModelStatusEmbed({
         // Load custom groups
         if (data.custom_groups && Array.isArray(data.custom_groups)) {
           setCustomGroups(data.custom_groups as EmbedCustomGroup[])
+        }
+        // Validate defaultGroup exists in loaded groups
+        if (defaultGroup && defaultGroup !== 'all') {
+          const groups = data.custom_groups as EmbedCustomGroup[]
+          if (!groups?.some((g: EmbedCustomGroup) => g.id === defaultGroup)) {
+            setGroupFilter('all')
+          }
         }
         // Load site title
         if (data.site_title) {
@@ -1040,8 +1046,7 @@ export function ModelStatusEmbed({
 
         {/* Stats Overview Bar */}
         {modelStatuses.length > 0 && theme !== 'minimal' && (() => {
-          const totalRequests = modelStatuses.reduce((sum, m) => sum + m.total_requests, 0)
-          const activeModels = modelStatuses.filter(m => m.total_requests > 0)
+          const activeModels = modelStatuses.filter(m => m.slot_data.some(s => s.has_requests))
           const avgRate = activeModels.length > 0 ? +(activeModels.reduce((sum, m) => sum + m.success_rate, 0) / activeModels.length).toFixed(1) : 0
           const greenCount = modelStatuses.filter(m => m.current_status === 'green').length
           const yellowCount = modelStatuses.filter(m => m.current_status === 'yellow').length
@@ -1066,10 +1071,6 @@ export function ModelStatusEmbed({
               theme === 'discord' && 'bg-[#2b2d31] rounded-[4px]',
               theme === 'tesla' && 'bg-[#111] border-t-2 border-[#333]',
             )}>
-              <div className={cn("flex items-center gap-2", styles.statsText)}>
-                <span>总请求</span>
-                <span className={cn(styles.statsValue, 'tabular-nums')}>{totalRequests.toLocaleString()}</span>
-              </div>
               <div className={cn("flex items-center gap-2", styles.statsText)}>
                 <span>平均成功率</span>
                 <span className={cn(
@@ -1096,23 +1097,24 @@ export function ModelStatusEmbed({
         })()}
 
         {/* Group Filter Tabs */}
-        {customGroups.length > 0 && modelStatuses.length > 0 && theme !== 'minimal' && (() => {
+        {customGroups.length > 0 && modelStatuses.length > 0 && (() => {
           // Count models per group
-          const activeModels = modelStatuses.filter(m => m.total_requests > 0)
-          const groupCountMap: Record<string, number> = { all: activeModels.length }
+          const groupCountMap: Record<string, number> = { all: modelStatuses.length }
           customGroups.forEach(g => {
-            groupCountMap[g.id] = activeModels.filter(m => g.models.includes(m.model_name)).length
+            groupCountMap[g.id] = modelStatuses.filter(m => g.models.includes(m.model_name)).length
           })
 
           return (
             <div className={cn(
               "flex items-center gap-2 overflow-x-auto pb-1 mb-5 scrollbar-hide",
+              theme === 'minimal' && 'mb-3 gap-1',
             )}>
               <Tag className="h-4 w-4 opacity-50 flex-shrink-0" />
               <button
                 onClick={() => setGroupFilter('all')}
                 className={cn(
-                  "inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-full border transition-all whitespace-nowrap flex-shrink-0",
+                  "inline-flex items-center gap-1.5 rounded-full border transition-all whitespace-nowrap flex-shrink-0",
+                  theme === 'minimal' ? 'px-2 py-1 text-[10px]' : 'px-3 py-1.5 text-xs',
                   groupFilter === 'all'
                     ? cn(
                         "font-semibold shadow-sm",
@@ -1132,6 +1134,7 @@ export function ModelStatusEmbed({
                         theme === 'github' && 'bg-[#58a6ff]/15 border-[#58a6ff]/40 text-[#58a6ff]',
                         theme === 'discord' && 'bg-[#5865F2]/20 border-[#5865F2]/40 text-[#5865F2]',
                         theme === 'tesla' && 'bg-[#e82127]/15 border-[#e82127]/40 text-[#e82127]',
+                        theme === 'minimal' && 'bg-gray-900 border-gray-900 text-white',
                       )
                     : cn(
                         "border-transparent opacity-60 hover:opacity-100",
@@ -1151,7 +1154,8 @@ export function ModelStatusEmbed({
                     key={group.id}
                     onClick={() => setGroupFilter(group.id)}
                     className={cn(
-                      "inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-full border transition-all whitespace-nowrap flex-shrink-0",
+                      "inline-flex items-center gap-1.5 font-medium rounded-full border transition-all whitespace-nowrap flex-shrink-0",
+                      theme === 'minimal' ? 'px-2 py-1 text-[10px]' : 'px-3.5 py-2 text-xs',
                       isActive
                         ? cn("font-semibold shadow-sm", colors)
                         : cn("border-transparent opacity-60 hover:opacity-100", styles.statsText)
@@ -1243,14 +1247,6 @@ export function ModelStatusEmbed({
           </div>
           <div className="space-y-1.5">
             <div className="flex justify-between gap-6">
-              <span className={styles.tooltipLabel}>总请求</span>
-              <span className={styles.tooltipValue}>{hoveredSlot.total_requests}</span>
-            </div>
-            <div className="flex justify-between gap-6">
-              <span className={styles.tooltipLabel}>成功数</span>
-              <span className={cn(styles.tooltipValue, 'text-emerald-400')}>{hoveredSlot.success_count}</span>
-            </div>
-            <div className="flex justify-between gap-6">
               <span className={styles.tooltipLabel}>成功率</span>
               <span className={cn(
                 styles.tooltipValue,
@@ -1336,9 +1332,6 @@ function EmbedModelCard({ model, theme, styles, onHover, onLeave }: EmbedModelCa
         <div className={styles.statsText}>
           <span className={styles.statsValue}>{model.success_rate}%</span>
           {!isMinimal && ' 成功率'}
-          <span className={isMinimal ? 'mx-1' : 'mx-2 opacity-30'}>·</span>
-          <span>{model.total_requests.toLocaleString()}</span>
-          {!isMinimal && ' 请求'}
         </div>
       </div>
 
@@ -1353,7 +1346,7 @@ function EmbedModelCard({ model, theme, styles, onHover, onLeave }: EmbedModelCa
               key={index}
               className={cn(
                 "flex-1 rounded-sm cursor-pointer transition-all duration-200",
-                slot.total_requests === 0 ? styles.statusEmpty : getStatusColor(slot.status, styles),
+                !slot.has_requests ? styles.statusEmpty : getStatusColor(slot.status, styles),
                 styles.statusHover
               )}
               onMouseEnter={(e) => handleMouseEnter(slot, e)}

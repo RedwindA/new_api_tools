@@ -1179,7 +1179,8 @@ export function ModelStatusEmbed({
           <div className={cn(
             theme === 'minimal' ? 'divide-y divide-gray-100' : 'grid grid-cols-1 lg:grid-cols-2 gap-4'
           )}>
-            {modelStatuses
+            {[...modelStatuses]
+              .sort((a, b) => b.success_rate - a.success_rate)
               .filter(model => {
                 if (groupFilter === 'all') return true
                 const group = customGroups.find(g => g.id === groupFilter)

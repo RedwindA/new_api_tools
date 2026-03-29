@@ -512,6 +512,39 @@ func (s *IPMonitoringService) EnableAllIPRecording() (map[string]interface{}, er
 	}, nil
 }
 
+// DisableAllIPRecording disables IP recording for all users by updating the setting JSON field
+func (s *IPMonitoringService) DisableAllIPRecording() (map[string]interface{}, error) {
+	var updateSQL string
+	if s.db.IsPG {
+		updateSQL = `
+			UPDATE users SET setting =
+				CASE
+					WHEN setting IS NULL OR setting = '' THEN '{"record_ip_log":false}'::jsonb::text
+					ELSE (setting::jsonb || '{"record_ip_log":false}'::jsonb)::text
+				END
+			WHERE deleted_at IS NULL
+			AND (setting IS NULL OR setting = '' OR setting::jsonb->>'record_ip_log' IS NULL OR setting::jsonb->>'record_ip_log' != 'false')`
+	} else {
+		updateSQL = `
+			UPDATE users SET setting =
+				CASE
+					WHEN setting IS NULL OR setting = '' THEN '{"record_ip_log":false}'
+					ELSE JSON_SET(setting, '$.record_ip_log', false)
+				END
+			WHERE deleted_at IS NULL
+			AND (setting IS NULL OR setting = '' OR JSON_EXTRACT(setting, '$.record_ip_log') IS NULL OR JSON_EXTRACT(setting, '$.record_ip_log') != false)`
+	}
+
+	affected, err := s.db.Execute(updateSQL)
+	if err != nil {
+		return nil, err
+	}
+	return map[string]interface{}{
+		"affected": affected,
+		"message":  fmt.Sprintf("已为 %d 个用户关闭 IP 记录", affected),
+	}, nil
+}
+
 // buildPlaceholders generates SQL placeholders for IN clauses.
 // For MySQL: returns "?,?,?" (count times)
 // For PostgreSQL: returns "$startIdx,$startIdx+1,..." (count times)

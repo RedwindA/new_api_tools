@@ -759,6 +759,76 @@ class IPMonitoringService:
             logger.db_error(f"批量开启 IP 记录失败: {e}")
             raise
 
+    def disable_all_ip_recording(self) -> Dict[str, Any]:
+        """
+        Disable IP recording for all users.
+        Updates the setting field to include record_ip_log: false.
+        """
+        self.db.connect()
+
+        is_pg = self.db.config.engine == DatabaseEngine.POSTGRESQL
+
+        try:
+            # Count total users
+            count_sql = "SELECT COUNT(*) as total FROM users WHERE deleted_at IS NULL"
+            count_rows = self.db.execute(count_sql, {})
+            total_users = int((count_rows[0] if count_rows else {}).get("total") or 0)
+
+            # Count already disabled users
+            if is_pg:
+                disabled_sql = """
+                    SELECT COUNT(*) as disabled
+                    FROM users
+                    WHERE deleted_at IS NULL
+                        AND setting IS NOT NULL AND setting <> ''
+                        AND setting::jsonb->>'record_ip_log' = 'false'
+                """
+            else:
+                disabled_sql = """
+                    SELECT COUNT(*) as disabled
+                    FROM users
+                    WHERE deleted_at IS NULL
+                        AND setting IS NOT NULL AND setting <> ''
+                        AND JSON_EXTRACT(setting, '$.record_ip_log') = false
+                """
+            disabled_rows = self.db.execute(disabled_sql, {})
+            already_disabled = int((disabled_rows[0] if disabled_rows else {}).get("disabled") or 0)
+
+            # Update users with record_ip_log enabled
+            if is_pg:
+                update_sql = """
+                    UPDATE users
+                    SET setting = COALESCE(NULLIF(setting, '')::jsonb, '{}'::jsonb) || '{"record_ip_log": false}'::jsonb
+                    WHERE deleted_at IS NULL
+                        AND (setting IS NULL
+                             OR setting = ''
+                             OR setting::jsonb->>'record_ip_log' IS NULL
+                             OR setting::jsonb->>'record_ip_log' <> 'false')
+                """
+            else:
+                update_sql = """
+                    UPDATE users
+                    SET setting = JSON_SET(COALESCE(NULLIF(setting, ''), '{}'), '$.record_ip_log', false)
+                    WHERE deleted_at IS NULL
+                        AND (setting IS NULL
+                             OR setting = ''
+                             OR JSON_EXTRACT(setting, '$.record_ip_log') IS NULL
+                             OR JSON_EXTRACT(setting, '$.record_ip_log') <> false)
+                """
+
+            self.db.execute(update_sql, {})
+
+            updated_count = total_users - already_disabled
+
+            return {
+                "updated_count": updated_count,
+                "skipped_count": already_disabled,
+                "total_users": total_users,
+            }
+        except Exception as e:
+            logger.db_error(f"批量关闭 IP 记录失败: {e}")
+            raise
+
     def get_ip_users(
         self,
         ip: str,

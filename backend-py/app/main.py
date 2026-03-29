@@ -194,7 +194,7 @@ async def lifespan(app: FastAPI):
     # 启动 GeoIP 数据库自动更新任务
     geoip_update_task = asyncio.create_task(background_geoip_update())
 
-    # 启动 IP 记录强制开启任务
+    # 启动 IP 记录强制关闭任务
     ip_recording_task = asyncio.create_task(background_enforce_ip_recording())
 
     yield
@@ -257,44 +257,42 @@ _indexes_ready = True  # 默认 True，如果没有索引任务则直接就绪
 
 async def background_enforce_ip_recording():
     """
-    后台任务：每 30 分钟检查并强制开启所有用户的 IP 记录功能。
-    防止用户自行关闭 IP 记录导致风控数据缺失。
+    后台任务：每 30 分钟检查并强制关闭所有用户的 IP 记录功能。
     """
     from .ip_monitoring_service import get_ip_monitoring_service
 
     # 启动后等待 60 秒再开始检查
     await asyncio.sleep(60)
-    logger.system("IP 记录强制开启任务已启动")
+    logger.system("IP 记录强制关闭任务已启动")
 
     while True:
         try:
             service = get_ip_monitoring_service()
-            
+
             # 获取当前 IP 记录状态
             stats = service.get_ip_recording_stats()
             total_users = stats.get("total_users", 0)
             enabled_count = stats.get("enabled_count", 0)
-            disabled_count = stats.get("disabled_count", 0)
-            
-            if disabled_count > 0:
-                # 有用户关闭了 IP 记录，强制开启
-                logger.system(f"[IP记录] 检测到 {disabled_count} 个用户关闭了 IP 记录，正在强制开启...")
-                
-                result = service.enable_all_ip_recording()
-                updated = result.get("updated", 0)
-                
+
+            if enabled_count > 0:
+                # 有用户开启了 IP 记录，强制关闭
+                logger.system(f"[IP记录] 检测到 {enabled_count} 个用户开启了 IP 记录，正在强制关闭...")
+
+                result = service.disable_all_ip_recording()
+                updated = result.get("updated_count", 0)
+
                 if updated > 0:
-                    logger.system(f"[IP记录] 已强制开启 {updated} 个用户的 IP 记录")
+                    logger.system(f"[IP记录] 已强制关闭 {updated} 个用户的 IP 记录")
                 else:
                     logger.debug("[IP记录] 无需更新")
             else:
-                logger.debug(f"[IP记录] 所有用户 ({total_users}) 已开启 IP 记录")
+                logger.debug(f"[IP记录] 所有用户 ({total_users}) 已关闭 IP 记录")
 
         except asyncio.CancelledError:
-            logger.system("IP 记录强制开启任务已取消")
+            logger.system("IP 记录强制关闭任务已取消")
             break
         except Exception as e:
-            logger.warning(f"[IP记录] 强制开启任务失败: {e}", category="任务")
+            logger.warning(f"[IP记录] 强制关闭任务失败: {e}", category="任务")
 
         # 每 30 分钟检查一次
         await asyncio.sleep(30 * 60)

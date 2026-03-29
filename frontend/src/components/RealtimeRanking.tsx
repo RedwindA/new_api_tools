@@ -241,7 +241,6 @@ export function RealtimeRanking() {
   // Tab 配置
   const riskTabs = useMemo(() => [
     { id: 'leaderboards' as const, label: '实时排行', icon: Activity },
-    { id: 'ip_monitoring' as const, label: 'IP 监控', icon: Globe },
     { id: 'banned_list' as const, label: '封禁列表', icon: ShieldBan },
     { id: 'audit_logs' as const, label: '审计日志', icon: Clock },
     { id: 'ai_ban' as const, label: 'AI 封禁', icon: AlertTriangle },

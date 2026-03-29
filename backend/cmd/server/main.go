@@ -112,7 +112,7 @@ func main() {
 
 	// ========== 7. Background tasks ==========
 
-	// IP recording enforcement: check every 10 minutes, enable if any user disabled it
+	// IP recording enforcement: check every 10 minutes, disable if any user enabled it
 	stopIPEnforce := make(chan struct{})
 	go backgroundEnforceIPRecording(stopIPEnforce)
 
@@ -169,7 +169,7 @@ func backgroundEnforceIPRecording(stop <-chan struct{}) {
 		return
 	}
 
-	logger.L.System("[IP记录] 强制开启定时任务已启动 (间隔: 10分钟)")
+	logger.L.System("[IP记录] 强制关闭定时任务已启动 (间隔: 10分钟)")
 
 	ticker := time.NewTicker(10 * time.Minute)
 	defer ticker.Stop()
@@ -181,7 +181,7 @@ func backgroundEnforceIPRecording(stop <-chan struct{}) {
 		select {
 		case <-ticker.C:
 		case <-stop:
-			logger.L.System("[IP记录] 强制开启定时任务已停止")
+			logger.L.System("[IP记录] 强制关闭定时任务已停止")
 			return
 		}
 	}
@@ -202,19 +202,19 @@ func enforceIPRecordingOnce() {
 		return
 	}
 
-	disabledCount := toInt64(stats["disabled_count"])
+	enabledCount := toInt64(stats["enabled_count"])
 	totalUsers := toInt64(stats["total_users"])
 
-	if disabledCount == 0 {
-		logger.L.Debug(fmt.Sprintf("[IP记录] 所有用户 (%d) 已开启 IP 记录，无需操作", totalUsers))
+	if enabledCount == 0 {
+		logger.L.Debug(fmt.Sprintf("[IP记录] 所有用户 (%d) 已关闭 IP 记录，无需操作", totalUsers))
 		return
 	}
 
-	logger.L.System(fmt.Sprintf("[IP记录] 检测到 %d 个用户关闭了 IP 记录，正在强制开启...", disabledCount))
+	logger.L.System(fmt.Sprintf("[IP记录] 检测到 %d 个用户开启了 IP 记录，正在强制关闭...", enabledCount))
 
-	result, err := svc.EnableAllIPRecording()
+	result, err := svc.DisableAllIPRecording()
 	if err != nil {
-		logger.L.Warn("[IP记录] 强制开启失败: " + err.Error())
+		logger.L.Warn("[IP记录] 强制关闭失败: " + err.Error())
 		return
 	}
 

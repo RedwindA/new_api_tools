@@ -101,3 +101,5 @@ test_cf_bypass_go/go.sum
 test_cf_bypass_go/main.go
 test_cf_bypass_go/test_cf.exe
 database_schema.sql
+
+.mcp.json

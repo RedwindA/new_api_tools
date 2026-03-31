@@ -1447,7 +1447,7 @@ export function ModelStatusMonitor({ isEmbed = false }: ModelStatusMonitorProps)
       {showGroupManager && (
         <GroupManagerModal
           groups={customGroups}
-          allModels={modelStatuses.filter(m => m.total_requests > 0).map(m => m.model_name)}
+          allModels={availableModels.map(m => m.model_name)}
           onSave={(groups) => {
             saveCustomGroups(groups)
             // Reset filter if the active group was deleted

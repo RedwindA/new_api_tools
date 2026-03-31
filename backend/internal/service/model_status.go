@@ -83,12 +83,25 @@ func (s *ModelStatusService) GetAvailableModels() ([]map[string]interface{}, err
 
 	startTime := time.Now().Unix() - 86400
 
-	query := s.db.RebindQuery(`
-		SELECT model_name, COUNT(*) as request_count_24h
-		FROM logs
-		WHERE type IN (2, 5) AND model_name != '' AND created_at >= ?
-		GROUP BY model_name
-		ORDER BY request_count_24h DESC`)
+	enabledCond := "COALESCE(ab.enabled, 1) = 1"
+	if s.db.IsPG {
+		enabledCond = "COALESCE(ab.enabled, TRUE) = TRUE"
+	}
+
+	query := s.db.RebindQuery(fmt.Sprintf(`
+		SELECT a.model AS model_name, COALESCE(l.cnt, 0) AS request_count_24h
+		FROM (
+			SELECT DISTINCT ab.model FROM abilities ab
+			INNER JOIN channels c ON c.id = ab.channel_id
+			WHERE c.status = 1 AND ab.model != '' AND %s
+		) a
+		LEFT JOIN (
+			SELECT model_name, COUNT(*) AS cnt
+			FROM logs
+			WHERE type IN (2, 5) AND model_name != '' AND created_at >= ?
+			GROUP BY model_name
+		) l ON a.model = l.model_name
+		ORDER BY request_count_24h DESC, a.model ASC`, enabledCond))
 
 	rows, err := s.db.Query(query, startTime)
 	if err != nil {

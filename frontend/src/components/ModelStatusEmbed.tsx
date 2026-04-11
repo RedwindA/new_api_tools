@@ -823,6 +823,7 @@ export function ModelStatusEmbed({
   defaultGroup,
 }: ModelStatusEmbedProps) {
   const [selectedModels, setSelectedModels] = useState<string[]>([])
+  const [availableModelCount, setAvailableModelCount] = useState(0)
   const [modelStatuses, setModelStatuses] = useState<ModelStatus[]>([])
   const [loading, setLoading] = useState(true)
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null)
@@ -900,6 +901,23 @@ export function ModelStatusEmbed({
   useEffect(() => {
     loadConfig()
   }, [loadConfig])
+
+  // 获取 abilities+channels 全量可用模型数,与管理员后台顶部"监控 N 个模型"保持一致
+  const fetchAvailableModelCount = useCallback(async () => {
+    try {
+      const response = await fetch(`${apiUrl}/api/model-status/embed/models`)
+      const data = await response.json()
+      if (data.success && Array.isArray(data.data)) {
+        setAvailableModelCount(data.data.length)
+      }
+    } catch (error) {
+      console.error('Failed to fetch available model count:', error)
+    }
+  }, [apiUrl])
+
+  useEffect(() => {
+    fetchAvailableModelCount()
+  }, [fetchAvailableModelCount])
 
   // Fetch model statuses
   // Embed page always uses cache to reduce database load
@@ -1027,7 +1045,7 @@ export function ModelStatusEmbed({
             </div>
             <p className={styles.headerSubtitle}>
               {TIME_WINDOWS.find(w => w.value === timeWindow)?.label || '24小时'}
-              {theme !== 'minimal' && ' 滑动窗口'} · {selectedModels.length} {theme === 'minimal' ? 'models' : '个模型'}
+              {theme !== 'minimal' && ' 滑动窗口'} · {availableModelCount} {theme === 'minimal' ? 'models' : '个模型'}
               {lastUpdate && theme !== 'minimal' && (
                 <span className="ml-2">· 更新于 {lastUpdate.toLocaleTimeString('zh-CN')}</span>
               )}

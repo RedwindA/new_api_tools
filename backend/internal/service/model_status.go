@@ -258,15 +258,42 @@ func (s *ModelStatusService) GetAllModelsStatus(window string) ([]map[string]int
 
 // Config management via cache
 
-// GetSelectedModels returns selected model names from cache
+// GetSelectedModels returns selected model names from cache.
+// 读取时与当前 abilities 全量做交集,剔除已不可用的幽灵模型,
+// 保证 embed 页面与管理员后台看到的勾选列表始终一致。
+// 若 abilities 查询失败(例如数据库暂时不可用),降级返回原始缓存列表,
+// 避免把 embed 显示成空。
 func (s *ModelStatusService) GetSelectedModels() []string {
 	cm := cache.Get()
 	var models []string
 	found, _ := cm.GetJSON("model_status:selected_models", &models)
-	if found {
+	if !found || len(models) == 0 {
+		return []string{}
+	}
+	return s.filterSelectedByAvailable(models)
+}
+
+// filterSelectedByAvailable 用当前 abilities 全量模型做白名单过滤,
+// 保持原列表的顺序,剔除已不在 abilities+channels 中的模型。
+// GetAvailableModels 查询失败时降级返回原列表。
+func (s *ModelStatusService) filterSelectedByAvailable(models []string) []string {
+	available, err := s.GetAvailableModels()
+	if err != nil {
 		return models
 	}
-	return []string{}
+	allowed := make(map[string]struct{}, len(available))
+	for _, m := range available {
+		if name, ok := m["model_name"].(string); ok && name != "" {
+			allowed[name] = struct{}{}
+		}
+	}
+	filtered := make([]string, 0, len(models))
+	for _, name := range models {
+		if _, ok := allowed[name]; ok {
+			filtered = append(filtered, name)
+		}
+	}
+	return filtered
 }
 
 // SetSelectedModels saves selected models to cache

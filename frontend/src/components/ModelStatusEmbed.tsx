@@ -205,7 +205,7 @@ const themeStyles: Record<ThemeId, {
     countdownLabel: 'text-gray-500',
     card: 'bg-[#161b22] border border-gray-800/80 rounded-xl p-5 transition-all duration-300',
     cardHover: 'hover:border-gray-700 hover:bg-[#1c2129]',
-    modelName: 'font-semibold text-white truncate max-w-md',
+    modelName: 'font-semibold text-white',
     statsText: 'text-sm text-gray-400',
     statsValue: 'text-white font-semibold',
     statusGreen: 'bg-emerald-500',
@@ -237,7 +237,7 @@ const themeStyles: Record<ThemeId, {
     countdownLabel: 'text-slate-400',
     card: 'bg-white border border-slate-200 rounded-xl p-5 shadow-sm transition-all duration-300',
     cardHover: 'hover:shadow-md hover:border-slate-300',
-    modelName: 'font-semibold text-slate-800 truncate max-w-md',
+    modelName: 'font-semibold text-slate-800',
     statsText: 'text-sm text-slate-500',
     statsValue: 'text-slate-800 font-semibold',
     statusGreen: 'bg-emerald-500',
@@ -269,7 +269,7 @@ const themeStyles: Record<ThemeId, {
     countdownLabel: 'text-gray-400',
     card: 'border-b border-gray-100 py-3 transition-colors',
     cardHover: 'hover:bg-gray-50',
-    modelName: 'font-medium text-gray-800 truncate max-w-md text-sm',
+    modelName: 'font-medium text-gray-800 text-sm',
     statsText: 'text-xs text-gray-400',
     statsValue: 'text-gray-700 font-medium',
     statusGreen: 'bg-gray-900',
@@ -308,7 +308,7 @@ const themeStyles: Record<ThemeId, {
     countdownLabel: 'text-gray-500 font-mono',
     card: 'bg-black/40 border border-purple-500/30 rounded-lg p-5 transition-all duration-300 relative overflow-hidden',
     cardHover: 'hover:border-pink-500/50 hover:shadow-[0_0_30px_rgba(236,72,153,0.2)]',
-    modelName: 'font-bold text-white truncate max-w-md tracking-wide',
+    modelName: 'font-bold text-white tracking-wide',
     statsText: 'text-sm text-gray-500 font-mono',
     statsValue: 'text-cyan-400 font-bold font-mono',
     statusGreen: 'bg-gradient-to-t from-emerald-600 to-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.5)]',
@@ -340,7 +340,7 @@ const themeStyles: Record<ThemeId, {
     countdownLabel: 'text-emerald-400/60',
     card: 'bg-[#064e3b]/20 border border-[#065f46]/50 rounded-xl p-5 transition-all duration-300',
     cardHover: 'hover:border-[#10b981]/30 hover:bg-[#064e3b]/30',
-    modelName: 'font-semibold text-emerald-50 truncate max-w-md',
+    modelName: 'font-semibold text-emerald-50',
     statsText: 'text-sm text-emerald-400/60',
     statsValue: 'text-emerald-100 font-semibold',
     statusGreen: 'bg-emerald-500',
@@ -372,7 +372,7 @@ const themeStyles: Record<ThemeId, {
     countdownLabel: 'text-blue-400/60',
     card: 'bg-blue-900/10 border border-blue-700/30 rounded-xl p-5 transition-all duration-300',
     cardHover: 'hover:border-blue-500/30 hover:bg-blue-900/20',
-    modelName: 'font-semibold text-blue-50 truncate max-w-md',
+    modelName: 'font-semibold text-blue-50',
     statsText: 'text-sm text-blue-400/60',
     statsValue: 'text-blue-100 font-semibold',
     statusGreen: 'bg-cyan-500',
@@ -404,7 +404,7 @@ const themeStyles: Record<ThemeId, {
     countdownLabel: 'text-green-500/60',
     card: 'bg-black border border-green-900 p-5 transition-all duration-300 hover:border-green-500',
     cardHover: 'hover:shadow-[0_0_10px_rgba(34,197,94,0.2)]',
-    modelName: 'font-bold text-green-500 truncate max-w-md',
+    modelName: 'font-bold text-green-500',
     statsText: 'text-sm text-green-500/60',
     statsValue: 'text-green-500 font-bold',
     statusGreen: 'bg-green-600',
@@ -436,7 +436,7 @@ const themeStyles: Record<ThemeId, {
     countdownLabel: 'text-gray-400',
     card: 'bg-white rounded-2xl p-5 shadow-[0_2px_12px_rgba(0,0,0,0.04)] transition-all duration-300',
     cardHover: 'hover:shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:-translate-y-0.5',
-    modelName: 'font-semibold text-gray-900 truncate max-w-md tracking-tight',
+    modelName: 'font-semibold text-gray-900 tracking-tight',
     statsText: 'text-sm text-gray-400',
     statsValue: 'text-gray-900 font-medium',
     statusGreen: 'bg-[#34c759]',
@@ -468,7 +468,7 @@ const themeStyles: Record<ThemeId, {
     countdownLabel: 'text-[#444746]',
     card: 'bg-[#fdfcff] rounded-[20px] p-5 shadow-sm transition-all duration-300',
     cardHover: 'hover:shadow-md hover:bg-[#f8faff]',
-    modelName: 'font-medium text-[#1f1f1f] truncate max-w-md text-lg',
+    modelName: 'font-medium text-[#1f1f1f] text-lg',
     statsText: 'text-sm text-[#444746]',
     statsValue: 'text-[#1f1f1f] font-medium',
     statusGreen: 'bg-[#1e8e3e]',
@@ -500,7 +500,7 @@ const themeStyles: Record<ThemeId, {
     countdownLabel: 'text-gray-500',
     card: 'bg-[#444654] rounded-md p-5 transition-all duration-200 border border-transparent',
     cardHover: 'hover:border-gray-500/50',
-    modelName: 'font-medium text-white truncate max-w-md',
+    modelName: 'font-medium text-white',
     statsText: 'text-sm text-gray-400',
     statsValue: 'text-gray-200 font-medium',
     statusGreen: 'bg-[#10a37f]',
@@ -532,7 +532,7 @@ const themeStyles: Record<ThemeId, {
     countdownLabel: 'text-[#6b665c] font-serif italic',
     card: 'bg-white border border-[#e6e1d6] rounded-xl p-6 shadow-sm transition-all duration-300',
     cardHover: 'hover:border-[#d97757]/30 hover:shadow-md',
-    modelName: 'font-serif font-medium text-[#191919] truncate max-w-md text-xl',
+    modelName: 'font-serif font-medium text-[#191919] text-xl',
     statsText: 'text-sm text-[#6b665c] font-serif',
     statsValue: 'text-[#191919] font-medium font-sans',
     statusGreen: 'bg-[#2d4f43]', // Dark Green used by Anthropic
@@ -569,7 +569,7 @@ const themeStyles: Record<ThemeId, {
     countdownLabel: 'text-[#666]',
     card: 'bg-black border border-[#333] rounded-lg p-5 transition-all duration-200 group',
     cardHover: 'hover:border-white', // Iconic Vercel hover effect
-    modelName: 'font-bold text-white truncate max-w-md tracking-tight group-hover:text-white transition-colors',
+    modelName: 'font-bold text-white tracking-tight group-hover:text-white transition-colors',
     statsText: 'text-sm text-[#888] font-medium',
     statsValue: 'text-white font-bold',
     statusGreen: 'bg-[#0070f3]', // Vercel Blue
@@ -603,7 +603,7 @@ const themeStyles: Record<ThemeId, {
     countdownLabel: 'text-[#8a8f98]',
     card: 'bg-[#16171d] border border-[#282930] rounded-xl p-5 transition-all duration-300 shadow-[0_2px_4px_rgba(0,0,0,0.2)]',
     cardHover: 'hover:border-[#3a3b42] hover:shadow-[0_4px_12px_rgba(0,0,0,0.3)] hover:bg-[#1a1b21]',
-    modelName: 'font-medium text-[#ededee] truncate max-w-md',
+    modelName: 'font-medium text-[#ededee]',
     statsText: 'text-sm text-[#8a8f98]',
     statsValue: 'text-[#ededee] font-medium',
     statusGreen: 'bg-[#5e6ad2]', // Linear Purple/Blue
@@ -637,7 +637,7 @@ const themeStyles: Record<ThemeId, {
     countdownLabel: 'text-[#697386]',
     card: 'bg-white rounded-lg p-5 shadow-[0_2px_5px_-1px_rgba(50,50,93,0.25),0_1px_3px_-1px_rgba(0,0,0,0.3)] transition-all duration-300',
     cardHover: 'hover:shadow-[0_6px_12px_-2px_rgba(50,50,93,0.25),0_3px_7px_-3px_rgba(0,0,0,0.3)] hover:-translate-y-0.5',
-    modelName: 'font-bold text-[#3c4257] truncate max-w-md',
+    modelName: 'font-bold text-[#3c4257]',
     statsText: 'text-sm text-[#697386] font-medium',
     statsValue: 'text-[#3c4257] font-bold',
     statusGreen: 'bg-[#635bff]', // Stripe Blurple
@@ -669,7 +669,7 @@ const themeStyles: Record<ThemeId, {
     countdownLabel: 'text-[#8b949e]',
     card: 'bg-[#161b22] border border-[#30363d] rounded-md p-5 transition-all duration-200',
     cardHover: 'hover:border-[#8b949e]',
-    modelName: 'font-semibold text-[#c9d1d9] truncate max-w-md hover:text-[#58a6ff] transition-colors',
+    modelName: 'font-semibold text-[#c9d1d9] hover:text-[#58a6ff] transition-colors',
     statsText: 'text-sm text-[#8b949e]',
     statsValue: 'text-[#c9d1d9] font-semibold',
     statusGreen: 'bg-[#238636]', // Primer Green
@@ -701,7 +701,7 @@ const themeStyles: Record<ThemeId, {
     countdownLabel: 'text-[#949ba4]',
     card: 'bg-[#2b2d31] rounded-[4px] p-5 transition-all duration-200 group',
     cardHover: 'hover:bg-[#404249] hover:shadow-md',
-    modelName: 'font-bold text-[#f2f3f5] truncate max-w-md group-hover:text-white transition-colors',
+    modelName: 'font-bold text-[#f2f3f5] group-hover:text-white transition-colors',
     statsText: 'text-sm text-[#949ba4] font-medium',
     statsValue: 'text-[#f2f3f5] font-bold',
     statusGreen: 'bg-[#23a559]',
@@ -733,7 +733,7 @@ const themeStyles: Record<ThemeId, {
     countdownLabel: 'text-[#666] uppercase text-xs tracking-wider',
     card: 'bg-[#111] border-t-2 border-[#333] p-5 transition-all duration-300 hover:bg-[#181818]',
     cardHover: 'hover:border-[#e82127] hover:shadow-[0_-4px_10px_rgba(232,33,39,0.2)]',
-    modelName: 'font-medium text-white truncate max-w-md tracking-wider uppercase',
+    modelName: 'font-medium text-white tracking-wider uppercase',
     statsText: 'text-sm text-[#666] tracking-wide uppercase',
     statsValue: 'text-white font-medium',
     statusGreen: 'bg-white', // Minimalist white for good status in dark mode
@@ -1321,38 +1321,48 @@ function EmbedModelCard({ model, theme, styles, onHover, onLeave }: EmbedModelCa
       )}
 
       {/* Header */}
-      <div className={cn(
-        "flex items-center justify-between",
-        isMinimal ? 'mb-2' : 'mb-4'
-      )}>
-        <div className="flex items-center gap-3 min-w-0">
-          {!isMinimal && (
+      {isMinimal ? (
+        // minimal 主题：保持原紧凑单行（list 行，非卡片）
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-3 min-w-0">
+            <h3 className={cn(styles.modelName, "truncate")} title={model.model_name}>
+              {model.model_name}
+            </h3>
+            <span className={getBadgeColor(model.current_status, styles)}>
+              {model.current_status === 'green' ? '●' : model.current_status === 'yellow' ? '◐' : '○'}
+            </span>
+          </div>
+          <div className={styles.statsText}>
+            <span className={styles.statsValue}>{model.success_rate}%</span>
+          </div>
+        </div>
+      ) : (
+        // 卡片主题：两行头部——模型名独占第一行，状态徽章 + 成功率在第二行
+        <div className="mb-4">
+          {/* 第一行：logo + 模型名 */}
+          <div className="flex items-center gap-3 min-w-0 mb-2.5">
             <div className="flex items-center justify-center w-7 h-7 rounded-md bg-current/5 flex-shrink-0">
               <ModelLogo modelName={model.model_name} size={18} />
             </div>
-          )}
-          <h3 className={styles.modelName} title={model.model_name}>
-            {model.model_name}
-          </h3>
-          {!isMinimal && (
+            <h3 className={cn(styles.modelName, "break-words line-clamp-2")} title={model.model_name}>
+              {model.model_name}
+            </h3>
+          </div>
+          {/* 第二行：状态徽章 + 成功率 */}
+          <div className="flex items-center justify-between gap-2">
             <span className={cn(
               "px-2 py-0.5 text-xs rounded-full font-medium",
               getBadgeColor(model.current_status, styles)
             )}>
               {STATUS_LABELS[model.current_status]}
             </span>
-          )}
-          {isMinimal && (
-            <span className={getBadgeColor(model.current_status, styles)}>
-              {model.current_status === 'green' ? '●' : model.current_status === 'yellow' ? '◐' : '○'}
-            </span>
-          )}
+            <div className={styles.statsText}>
+              <span className={styles.statsValue}>{model.success_rate}%</span>
+              {' 成功率'}
+            </div>
+          </div>
         </div>
-        <div className={styles.statsText}>
-          <span className={styles.statsValue}>{model.success_rate}%</span>
-          {!isMinimal && ' 成功率'}
-        </div>
-      </div>
+      )}
 
       {/* Status Timeline */}
       <div className="relative">
